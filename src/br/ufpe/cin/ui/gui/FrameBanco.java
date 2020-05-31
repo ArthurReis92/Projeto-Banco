@@ -23,6 +23,7 @@ import br.ufpe.cin.banco.RenderJurosPoupancaException;
 import br.ufpe.cin.banco.SaldoInsuficienteException;
 import br.ufpe.cin.dados.ContaNaoEncontradaException;
 import br.ufpe.cin.dados.RepositorioContasArray;
+import br.ufpe.cin.dados.RepositorioContasArrayList;
 
 public class FrameBanco extends JFrame {
 
@@ -60,7 +61,7 @@ public class FrameBanco extends JFrame {
 		super();
 		initialize();
 		
-		fachada = new Banco(new RepositorioContasArray(100));
+		fachada = new Banco(new RepositorioContasArrayList());
 		
 		
 		//Veja como usar RadioButton em 
