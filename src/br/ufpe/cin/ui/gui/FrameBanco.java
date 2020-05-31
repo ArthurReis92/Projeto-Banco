@@ -22,7 +22,6 @@ import br.ufpe.cin.banco.RenderBonusContaEspecialException;
 import br.ufpe.cin.banco.RenderJurosPoupancaException;
 import br.ufpe.cin.banco.SaldoInsuficienteException;
 import br.ufpe.cin.dados.ContaNaoEncontradaException;
-import br.ufpe.cin.dados.RepositorioContasArray;
 import br.ufpe.cin.dados.RepositorioContasArrayList;
 
 public class FrameBanco extends JFrame {

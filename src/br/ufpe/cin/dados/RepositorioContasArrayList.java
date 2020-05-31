@@ -37,7 +37,7 @@ public class RepositorioContasArrayList implements RepositorioContas{
 
 	@Override
 	public void atualizar(ContaAbstrata conta) throws ContaNaoEncontradaException {
-		contas.set(contas.indexOf(conta), conta);
+		contas.set(this.getIndice(conta.getNumero()), conta);
 	}
 
 	@Override
