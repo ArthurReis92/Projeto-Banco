@@ -5,6 +5,7 @@ import br.ufpe.cin.banco.Conta;
 import br.ufpe.cin.banco.ContaEspecial;
 import br.ufpe.cin.banco.ContaImposto;
 import br.ufpe.cin.banco.ContaJaCadastradaException;
+import br.ufpe.cin.banco.OperacaoComValorNegativoException;
 import br.ufpe.cin.banco.Poupanca;
 import br.ufpe.cin.banco.RenderBonusContaEspecialException;
 import br.ufpe.cin.banco.RenderJurosPoupancaException;
@@ -74,6 +75,8 @@ public class Programa {
 		} catch (RenderBonusContaEspecialException e) {
 			System.out.println(e.getMessage());
 		} catch (RenderJurosPoupancaException e) {
+			System.out.println(e.getMessage());
+		} catch (OperacaoComValorNegativoException e) {
 			System.out.println(e.getMessage());
 		}
 	}

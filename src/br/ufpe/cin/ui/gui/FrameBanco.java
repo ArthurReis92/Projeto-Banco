@@ -17,6 +17,7 @@ import br.ufpe.cin.banco.ContaAbstrata;
 import br.ufpe.cin.banco.ContaEspecial;
 import br.ufpe.cin.banco.ContaImposto;
 import br.ufpe.cin.banco.ContaJaCadastradaException;
+import br.ufpe.cin.banco.OperacaoComValorNegativoException;
 import br.ufpe.cin.banco.Poupanca;
 import br.ufpe.cin.banco.RenderBonusContaEspecialException;
 import br.ufpe.cin.banco.RenderJurosPoupancaException;
@@ -223,6 +224,8 @@ public class FrameBanco extends JFrame {
 				erroConversao();
 			} catch (ContaNaoEncontradaException e) {
 				erroNumero(e.getMessage());
+			} catch (OperacaoComValorNegativoException e) {
+				erroNumero(e.getMessage());
 			}
 		}
 	}
@@ -262,6 +265,8 @@ public class FrameBanco extends JFrame {
 				erroNumero(e.getMessage());
 			} catch (SaldoInsuficienteException e) {
 				erroSaldo(e.getMessage());
+			} catch (OperacaoComValorNegativoException e) {
+				erroNumero(e.getMessage());
 			}
 		}
 	}

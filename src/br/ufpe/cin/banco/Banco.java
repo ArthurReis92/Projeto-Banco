@@ -30,12 +30,18 @@ public class Banco {
 		}
 	}
 
-	public void creditar(String numero, double valor) throws ContaNaoEncontradaException{
+	public void creditar(String numero, double valor) throws ContaNaoEncontradaException, OperacaoComValorNegativoException{
+		if (valor < 0) {
+			throw new OperacaoComValorNegativoException();
+		}
 		ContaAbstrata c = contas.procurar(numero);
 		c.creditar(valor);
 	}
 
-	public void debitar(String numero, double valor) throws ContaNaoEncontradaException, SaldoInsuficienteException {
+	public void debitar(String numero, double valor) throws ContaNaoEncontradaException, SaldoInsuficienteException, OperacaoComValorNegativoException {
+		if (valor < 0) {
+			throw new OperacaoComValorNegativoException();
+		}
 		ContaAbstrata c = contas.procurar(numero);
 		c.debitar(valor);
 	}
