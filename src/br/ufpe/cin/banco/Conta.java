@@ -7,7 +7,7 @@ public class Conta extends ContaAbstrata {
 	}
 	
 	public Conta(String numero) {
-		super(numero, 0.0);
+		super(numero);
 	}
 
 	public void debitar(double valor) throws SaldoInsuficienteException {
