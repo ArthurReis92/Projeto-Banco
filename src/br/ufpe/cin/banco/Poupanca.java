@@ -7,11 +7,13 @@ public class Poupanca extends Conta {
 	}
 	
 	public Poupanca(String numero) {
-		this(numero, 0.0);
+		super(numero);
 	}
 	
 	public void renderJuros(double taxa) {
 		double juros = this.getSaldo() * taxa;
 		this.creditar(juros);
 	}
+	
+	
 }
