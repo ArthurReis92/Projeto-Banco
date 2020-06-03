@@ -17,17 +17,19 @@ import br.ufpe.cin.banco.ContaAbstrata;
 import br.ufpe.cin.banco.ContaEspecial;
 import br.ufpe.cin.banco.ContaImposto;
 import br.ufpe.cin.banco.ContaJaCadastradaException;
+import br.ufpe.cin.banco.OperacaoComValorNegativoException;
 import br.ufpe.cin.banco.Poupanca;
+import br.ufpe.cin.banco.PoupancaEspecial;
 import br.ufpe.cin.banco.RenderBonusContaEspecialException;
 import br.ufpe.cin.banco.RenderJurosPoupancaException;
 import br.ufpe.cin.banco.SaldoInsuficienteException;
 import br.ufpe.cin.dados.ContaNaoEncontradaException;
-import br.ufpe.cin.dados.RepositorioContasArray;
+import br.ufpe.cin.dados.RepositorioContasArrayList;
 
 public class FrameBanco extends JFrame {
 
 	private Banco fachada;
-	
+
 	private static final long serialVersionUID = 1L;
 	private JPanel jContentPane = null;
 	private JButton bt_cadastrar = null;
@@ -50,27 +52,30 @@ public class FrameBanco extends JFrame {
 
 	private JRadioButton rb_contaImposto = null;
 
+	private JRadioButton rb_poupancaEspecial = null;
+
 	private JPanel jPanel = null;
 
 	private JPanel jPanel1 = null;
+
 	/**
 	 * This is the default constructor
 	 */
 	public FrameBanco() {
 		super();
 		initialize();
-		
-		fachada = new Banco(new RepositorioContasArray(100));
-		
-		
-		//Veja como usar RadioButton em 
-		//http://java.sun.com/j2se/1.5.0/docs/api/javax/swing/JRadioButton.html
+
+		fachada = new Banco(new RepositorioContasArrayList());
+
+		// Veja como usar RadioButton em
+		// http://java.sun.com/j2se/1.5.0/docs/api/javax/swing/JRadioButton.html
 		ButtonGroup bg = new ButtonGroup();
 		bg.add(rb_conta);
 		bg.add(rb_contaEspecial);
 		bg.add(rb_contaImposto);
 		bg.add(rb_poupanca);
-		
+		bg.add(rb_poupancaEspecial);
+
 	}
 
 	private void erroConversao() {
@@ -82,33 +87,39 @@ public class FrameBanco extends JFrame {
 	private void erroNumero() {
 		erroNumero("Informe o número da conta desejada");
 	}
-	
+
 	private void erroNumero(String mensagem) {
 		JOptionPane.showMessageDialog(this, mensagem);
 		tf_numero.selectAll();
 		tf_numero.requestFocus();
 	}
-	
+
 	private void erroSaldo(String mensagem) {
 		JOptionPane.showMessageDialog(this, mensagem);
 		tf_valor.selectAll();
 		tf_valor.requestFocus();
 	}
 	
+	private void erroValor(String message) {
+		JOptionPane.showMessageDialog(this, message);
+		tf_valor.selectAll();
+		tf_valor.requestFocus();
+	}
+
 	private void sucesso(String mensagem) {
 		JOptionPane.showMessageDialog(this, mensagem);
 		tf_numero.setText("");
 		tf_valor.setText("");
 		tf_numero.requestFocus();
 	}
-	
+
 	/**
 	 * This method initializes this
 	 * 
 	 * @return void
 	 */
 	private void initialize() {
-		this.setSize(382, 207);
+		this.setSize(550, 270);
 		this.setContentPane(getJContentPane());
 		this.setTitle("Aplicação Bancária");
 	}
@@ -143,9 +154,9 @@ public class FrameBanco extends JFrame {
 	}
 
 	/**
-	 * This method initializes bt_cadastrar	
-	 * 	
-	 * @return javax.swing.JButton	
+	 * This method initializes bt_cadastrar
+	 * 
+	 * @return javax.swing.JButton
 	 */
 	private JButton getBt_cadastrar() {
 		if (bt_cadastrar == null) {
@@ -165,35 +176,51 @@ public class FrameBanco extends JFrame {
 		ContaAbstrata conta = null;
 		String numero = tf_numero.getText();
 		String v = tf_valor.getText();
-		if (numero.equals("")) {
+		if (numero.equals("") || !isNumber(numero)) {
 			erroNumero();
 		} else {
 			try {
 				double valor = Double.parseDouble(v);
-				if(rb_conta.isSelected()) {
+				if (rb_conta.isSelected()) {
 					conta = new Conta(numero, valor);
-				} else if(rb_poupanca.isSelected()) {
+				} else if (rb_poupanca.isSelected()) {
 					conta = new Poupanca(numero, valor);
-				} else if(rb_contaEspecial.isSelected()) {
+				} else if (rb_contaEspecial.isSelected()) {
 					conta = new ContaEspecial(numero, valor);
-				} else if(rb_contaImposto.isSelected()) {
+				} else if (rb_contaImposto.isSelected()) {
 					conta = new ContaImposto(numero, valor);
+				} else if (rb_poupancaEspecial.isSelected()) {
+					conta = new PoupancaEspecial(numero, valor);
 				}
 				fachada.cadastrar(conta);
-				sucesso(conta.getClass().getSimpleName()+" cadastrada com sucesso");
+				sucesso(conta.getClass().getSimpleName() + " cadastrada com sucesso");
 			} catch (NumberFormatException e) {
 				erroConversao();
 			} catch (ContaJaCadastradaException e) {
 				erroNumero(e.getMessage());
+			} catch (OperacaoComValorNegativoException e) {
+				erroValor(e.getMessage());
 			}
 		}
 	}
 
+	private boolean isNumber(String numero) {
+		char[] c = numero.toCharArray();
+		boolean d = true;
+
+		for (int i = 0; i < numero.length(); i++) {
+			if (!Character.isDigit(c[i])) {
+				d = false;
+				break;
+			}
+		}
+		return d;
+	}
 
 	/**
-	 * This method initializes bt_creditar	
-	 * 	
-	 * @return javax.swing.JButton	
+	 * This method initializes bt_creditar
+	 * 
+	 * @return javax.swing.JButton
 	 */
 	private JButton getBt_creditar() {
 		if (bt_creditar == null) {
@@ -216,21 +243,23 @@ public class FrameBanco extends JFrame {
 			erroNumero();
 		} else {
 			try {
-				double valor = Double.parseDouble(v);	
+				double valor = Double.parseDouble(v);
 				fachada.creditar(numero, valor);
 				sucesso("Credito executado com sucesso");
 			} catch (NumberFormatException e) {
 				erroConversao();
 			} catch (ContaNaoEncontradaException e) {
 				erroNumero(e.getMessage());
+			} catch (OperacaoComValorNegativoException e) {
+				erroNumero(e.getMessage());
 			}
 		}
 	}
 
 	/**
-	 * This method initializes bt_debitar	
-	 * 	
-	 * @return javax.swing.JButton	
+	 * This method initializes bt_debitar
+	 * 
+	 * @return javax.swing.JButton
 	 */
 	private JButton getBt_debitar() {
 		if (bt_debitar == null) {
@@ -253,7 +282,7 @@ public class FrameBanco extends JFrame {
 			erroNumero();
 		} else {
 			try {
-				double valor = Double.parseDouble(v);	
+				double valor = Double.parseDouble(v);
 				fachada.debitar(numero, valor);
 				sucesso("Debito executado com sucesso");
 			} catch (NumberFormatException e) {
@@ -262,14 +291,16 @@ public class FrameBanco extends JFrame {
 				erroNumero(e.getMessage());
 			} catch (SaldoInsuficienteException e) {
 				erroSaldo(e.getMessage());
+			} catch (OperacaoComValorNegativoException e) {
+				erroNumero(e.getMessage());
 			}
 		}
 	}
 
 	/**
-	 * This method initializes bt_transferir	
-	 * 	
-	 * @return javax.swing.JButton	
+	 * This method initializes bt_transferir
+	 * 
+	 * @return javax.swing.JButton
 	 */
 	private JButton getBt_transferir() {
 		if (bt_transferir == null) {
@@ -305,14 +336,17 @@ public class FrameBanco extends JFrame {
 				erroNumero(e.getMessage());
 			} catch (SaldoInsuficienteException e) {
 				erroSaldo(e.getMessage());
+			} catch (OperacaoComValorNegativoException e) {
+				erroValor(e.getMessage());
 			}
 		}
 	}
 
+
 	/**
-	 * This method initializes bt_saldo	
-	 * 	
-	 * @return javax.swing.JButton	
+	 * This method initializes bt_saldo
+	 * 
+	 * @return javax.swing.JButton
 	 */
 	private JButton getBt_saldo() {
 		if (bt_saldo == null) {
@@ -335,7 +369,7 @@ public class FrameBanco extends JFrame {
 		} else {
 			try {
 				double saldo = fachada.getSaldo(numero);
-				sucesso("O saldo da conta "+ numero+" eh "+saldo);
+				sucesso("O saldo da conta " + numero + " eh " + saldo);
 			} catch (ContaNaoEncontradaException e) {
 				erroNumero(e.getMessage());
 			}
@@ -343,9 +377,9 @@ public class FrameBanco extends JFrame {
 	}
 
 	/**
-	 * This method initializes bt_renderJuros	
-	 * 	
-	 * @return javax.swing.JButton	
+	 * This method initializes bt_renderJuros
+	 * 
+	 * @return javax.swing.JButton
 	 */
 	private JButton getBt_renderJuros() {
 		if (bt_renderJuros == null) {
@@ -373,14 +407,16 @@ public class FrameBanco extends JFrame {
 				erroNumero(e.getMessage());
 			} catch (RenderJurosPoupancaException e) {
 				erroNumero(e.getMessage());
+			} catch (OperacaoComValorNegativoException e) {
+				erroValor(e.getMessage());
 			}
 		}
 	}
 
 	/**
-	 * This method initializes bt_renderBonus	
-	 * 	
-	 * @return javax.swing.JButton	
+	 * This method initializes bt_renderBonus
+	 * 
+	 * @return javax.swing.JButton
 	 */
 	private JButton getBt_renderBonus() {
 		if (bt_renderBonus == null) {
@@ -408,29 +444,30 @@ public class FrameBanco extends JFrame {
 				erroNumero(e.getMessage());
 			} catch (RenderBonusContaEspecialException e) {
 				erroNumero(e.getMessage());
+			} catch (OperacaoComValorNegativoException e) {
+				erroValor(e.getMessage());
 			}
 		}
 	}
 
 	/**
-	 * This method initializes tf_numero	
-	 * 	
-	 * @return javax.swing.JTextField	
+	 * This method initializes tf_numero
+	 * 
+	 * @return javax.swing.JTextField
 	 */
 	private JTextField getTf_numero() {
 		if (tf_numero == null) {
 			tf_numero = new JTextField();
 			tf_numero.setToolTipText("Número da conta a ser operada (se transferencia, conta de origem)");
-			tf_numero.setBounds(new Rectangle(0
-					, 7, 103, 28));
+			tf_numero.setBounds(new Rectangle(0, 7, 103, 28));
 		}
 		return tf_numero;
 	}
 
 	/**
-	 * This method initializes tf_valor	
-	 * 	
-	 * @return javax.swing.JTextField	
+	 * This method initializes tf_valor
+	 * 
+	 * @return javax.swing.JTextField
 	 */
 	private JTextField getTf_valor() {
 		if (tf_valor == null) {
@@ -442,9 +479,9 @@ public class FrameBanco extends JFrame {
 	}
 
 	/**
-	 * This method initializes rb_conta	
-	 * 	
-	 * @return javax.swing.JRadioButton	
+	 * This method initializes rb_conta
+	 * 
+	 * @return javax.swing.JRadioButton
 	 */
 	private JRadioButton getRb_conta() {
 		if (rb_conta == null) {
@@ -457,9 +494,9 @@ public class FrameBanco extends JFrame {
 	}
 
 	/**
-	 * This method initializes rb_Poupanca	
-	 * 	
-	 * @return javax.swing.JRadioButton	
+	 * This method initializes rb_Poupanca
+	 * 
+	 * @return javax.swing.JRadioButton
 	 */
 	private JRadioButton getRb_Poupanca() {
 		if (rb_poupanca == null) {
@@ -471,57 +508,72 @@ public class FrameBanco extends JFrame {
 	}
 
 	/**
-	 * This method initializes rb_contaEspecial	
-	 * 	
-	 * @return javax.swing.JRadioButton	
+	 * This method initializes rb_contaEspecial
+	 * 
+	 * @return javax.swing.JRadioButton
 	 */
 	private JRadioButton getRb_contaEspecial() {
 		if (rb_contaEspecial == null) {
 			rb_contaEspecial = new JRadioButton();
 			rb_contaEspecial.setText("Conta especial");
-			rb_contaEspecial.setBounds(new Rectangle(223, 5, 131, 23));
+			rb_contaEspecial.setBounds(new Rectangle(223, 5, 120, 23));
 		}
 		return rb_contaEspecial;
 	}
 
 	/**
-	 * This method initializes rb_contaImposto	
-	 * 	
-	 * @return javax.swing.JRadioButton	
+	 * This method initializes rb_contaImposto
+	 * 
+	 * @return javax.swing.JRadioButton
 	 */
 	private JRadioButton getRb_contaImposto() {
 		if (rb_contaImposto == null) {
 			rb_contaImposto = new JRadioButton();
 			rb_contaImposto.setText("Conta imposto");
-			rb_contaImposto.setBounds(new Rectangle(223, 32, 131, 23));
+			rb_contaImposto.setBounds(new Rectangle(223, 32, 120, 23));
 		}
 		return rb_contaImposto;
 	}
 
 	/**
-	 * This method initializes jPanel	
-	 * 	
-	 * @return javax.swing.JPanel	
+	 * This method initializes rb_Poupanca
+	 * 
+	 * @return javax.swing.JRadioButton
+	 */
+	private JRadioButton getRb_PoupancaEspecial() {
+		if (rb_poupancaEspecial == null) {
+			rb_poupancaEspecial = new JRadioButton();
+			rb_poupancaEspecial.setText("Poupanca especial");
+			rb_poupancaEspecial.setBounds(new Rectangle(347, 5, 145, 23));
+		}
+		return rb_poupancaEspecial;
+	}
+
+	/**
+	 * This method initializes jPanel
+	 * 
+	 * @return javax.swing.JPanel
 	 */
 	private JPanel getJPanel() {
 		if (jPanel == null) {
 			jPanel = new JPanel();
 			jPanel.setLayout(null);
-			jPanel.setBounds(new Rectangle(16, 9, 353, 59));
+			jPanel.setBounds(new Rectangle(16, 9, 500, 59));
 			jPanel.setBackground(Color.gray);
 			jPanel.add(getBt_cadastrar(), null);
 			jPanel.add(getRb_conta(), null);
 			jPanel.add(getRb_Poupanca(), null);
 			jPanel.add(getRb_contaEspecial(), null);
 			jPanel.add(getRb_contaImposto(), null);
+			jPanel.add(getRb_PoupancaEspecial(), null);
 		}
 		return jPanel;
 	}
 
 	/**
-	 * This method initializes jPanel1	
-	 * 	
-	 * @return javax.swing.JPanel	
+	 * This method initializes jPanel1
+	 * 
+	 * @return javax.swing.JPanel
 	 */
 	private JPanel getJPanel1() {
 		if (jPanel1 == null) {
