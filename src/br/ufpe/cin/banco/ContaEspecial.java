@@ -4,21 +4,21 @@ public class ContaEspecial extends Conta {
 	
 	private double bonus;
 
-	public ContaEspecial(String numero, double valor) {
+	public ContaEspecial(String numero, double valor) throws OperacaoComValorNegativoException {
 		super(numero, valor);
 		bonus = 0.0;
 	}
 	
-	public ContaEspecial(String numero) {
+	public ContaEspecial(String numero) throws OperacaoComValorNegativoException {
 		this(numero, 0.0);
 	}
 
-	public void creditar(double valor) {
+	public void creditar(double valor) throws OperacaoComValorNegativoException {
 		super.creditar(valor);
 		bonus = bonus + (valor * 0.01);
 	}
 
-	public void renderBonus() {
+	public void renderBonus() throws OperacaoComValorNegativoException {
 		super.creditar(this.bonus);
 		bonus = 0;
 	}
